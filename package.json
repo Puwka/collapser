@@ -5,10 +5,21 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "start": "nodemon ./backend/app.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.18.0",
+    "bcrypt": "^3.0.5",
     "core-js": "^2.6.5",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "mongodb": "^3.2.3",
+    "mongoose": "^5.4.22",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
