@@ -12,7 +12,9 @@ class Players {
 
     removePlayer(socket) {
         const index = this.players.findIndex(player => player.socket === socket);
-        this.players.splice(index, 1);
+        if (index !== -1) {
+            this.players.splice(index, 1);
+        }
     }
 
     getPlayerIds() {
