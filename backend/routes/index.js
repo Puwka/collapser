@@ -35,7 +35,7 @@ router
     .prefix('/api')
     .get('/end', async ctx => {
         if (process.env.ENV === 'production') {
-            ctx.body = config.production.wsHost;
+            ctx.body = { endpoint: config.production.wsHost };
             return;
         }
         ctx.body = { endpoint: config.development.wsHost };

@@ -16,16 +16,16 @@ async function updatePlayersList(io) {
     io.emit('updatePlayersList', users);
 }
 
-async function joinPlayer(socket, io, userId) {
-    players.addPlayer({ socket: socket.id, id: userId });
-    await updatePlayersList(io);
-    await updatePlayer(socket, userId);
-}
-
 async function updatePlayer(socket, userId) {
     const { User } = mongoose.models;
     const player = await User.findOne({ _id: userId }, { _id: false, nickname: 1, level: 1 });
     socket.emit('youAre', player);
+}
+
+async function joinPlayer(socket, io, userId) {
+    players.addPlayer({ socket: socket.id, id: userId });
+    await updatePlayersList(io);
+    await updatePlayer(socket, userId);
 }
 
 function init(server) {
