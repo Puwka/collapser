@@ -22,7 +22,7 @@ export default {
     created() {
         this.$store.registerModule(GAME_STORE, game);
         this.$axios.get('/end');
-        const socket = io('http://192.168.100.6:3000');
+        const socket = io('http://localhost');
 
         socket.emit('imInGame', localStorage.getItem('auth'));
         socket.on('updatePlayersList', list => {

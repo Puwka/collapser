@@ -1,12 +1,15 @@
 const Koa = require('koa');
 const http = require('http');
 const bodyParser = require('koa-bodyparser');
-const io = require('socket.io');
+const send = require('koa-send');
 const mongoose = require('mongoose');
+const path = require('path');
+const serve = require('koa-static');
 
 const { verifyJwt } = require('./services/jwt');
-const { joinPlayer } = require('./services/socket');
+const sockets = require('./services/socket');
 const db = require('./db');
+const config = require('../config');
 
 db.connect();
 
@@ -15,20 +18,15 @@ const { router } = require('./routes');
 
 const app = new Koa();
 const server = http.createServer(app.callback());
-const sock = io(server);
-
-sock.on('connection', socket => {
-    socket.on('imInGame', async token => {
-        const { User } = mongoose.models;
-        const { user } = verifyJwt(token);
-        const { _id } = await User.findOne({ _id: user });
-        await joinPlayer(sock, _id.toString());
-    });
-});
+sockets.init(server);
 
 app
+    .use(serve(path.join(__dirname, '..', 'dist')))
     .use(bodyParser())
     .use(async (ctx, next) => {
+        if (!ctx.request.path.startsWith('/api')) {
+            return next();
+        }
         const { User } = mongoose.models;
         if (['/api/signin', '/api/signup'].includes(ctx.request.path)) {
             return next();
@@ -49,6 +47,17 @@ app
         await next();
     })
     .use(router.routes())
-    .use(router.allowedMethods());
+    .use(router.allowedMethods())
+    .use(async ctx => {
+        await send(ctx, 'index.html', {
+            root: './dist',
+        });
+    });
 
-server.listen(3000, () => console.log('server spinning on 3000'));
+process.on('SIGINT', () => {
+    process.exit();
+});
+
+const PORT = process.env.ENV === 'production' ? config.production.port : config.development.port;
+
+server.listen(PORT, () => console.log(`server spinning on ${PORT}`));

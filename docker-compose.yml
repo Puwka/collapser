@@ -1,0 +1,19 @@
+version: "2"
+services:
+  app:
+    container_name: collapser
+    restart: always
+    build: .
+    environment:
+      - ENV=production
+    ports:
+      - "80:3000"
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db

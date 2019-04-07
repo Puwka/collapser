@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
+const config = require('../../config');
 
 
 const connect = () => {
-    mongoose.connect('mongodb://localhost:27017/collapser', { useNewUrlParser: true });
+    const mongoHost = process.env.ENV === 'production' ? config.production.database.host : config.development.database.host;
+    mongoose.connect(`mongodb://${mongoHost}:27017/collapser`, { useNewUrlParser: true });
     const db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'connection error:'));
+    db.on('error', console.error.bind(console, 'connectiodsfn error:'));
     db.once('open', () => {
-        console.log('connected');
+        console.log('connected mongodb');
     });
 };
 
@@ -21,4 +23,4 @@ const userSchema = new mongoose.Schema({
 
 const user = mongoose.model('User', userSchema);
 
-module.exports = { connect }
+module.exports = { connect };
