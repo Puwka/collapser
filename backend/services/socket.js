@@ -8,15 +8,24 @@ const players = new Players();
 
 async function updatePlayersList(io) {
     const { User } = mongoose.models;
+
     const users = await User.find({
-        _id: { $in: players.getUserIds() }
+        _id: { $in: players.getPlayerIds() }
     }, { _id: false, nickname: 1, level: 1 });
+
     io.emit('updatePlayersList', users);
 }
 
 async function joinPlayer(socket, io, userId) {
-    players.addPlayer({ socket, id: userId });
+    players.addPlayer({ socket: socket.id, id: userId });
     await updatePlayersList(io);
+    await updatePlayer(socket, userId);
+}
+
+async function updatePlayer(socket, userId) {
+    const { User } = mongoose.models;
+    const player = await User.findOne({ _id: userId }, { _id: false, nickname: 1, level: 1 });
+    socket.emit('youAre', player);
 }
 
 function init(server) {
@@ -34,9 +43,19 @@ function init(server) {
             players.removePlayer(socket.id);
             await updatePlayersList(io);
         });
+
+        socket.on('monsterDamage', damage => {
+            socket.broadcast.emit('monsterDamage', damage);
+        });
+
+        socket.on('monsterSlain', async () => {
+            await players.lvlUpPlayer({ socket: socket.id });
+            await updatePlayersList(io);
+            await updatePlayer(socket, players.getPlayerId(socket.id));
+        });
     });
 }
 
 module.exports = {
-    joinPlayer, init
+    init
 };

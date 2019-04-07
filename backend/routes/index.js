@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const { encrypt, compare } = require('../services/crypto');
 const { generateJwt } = require('../services/jwt');
+const config = require('../../config');
 
 const { User } = mongoose.models;
 
@@ -33,7 +34,11 @@ const postSignIn = async ctx => {
 router
     .prefix('/api')
     .get('/end', async ctx => {
-        ctx.body = '12312';
+        if (process.env.ENV === 'production') {
+            ctx.body = config.production.wsHost;
+            return;
+        }
+        ctx.body = { endpoint: config.development.wsHost };
     })
     .post('/signup', postSignUp)
     .post('/signin', postSignIn);

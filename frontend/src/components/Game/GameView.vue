@@ -1,12 +1,15 @@
 <template>
-    <div class="sidebar">
-        <div class="player" v-for="player in list" :key="player.nickname">
-            Nick: {{player.nickname}}<br>
-            <span
-                    class="level"
-                    :class="getLevel(player.level)">Level: {{player.level}}
-            </span>
+    <div class="container">
+        <div class="sidebar">
+            <div class="player" v-for="player in list" :key="player.nickname">
+                Nick: {{player.nickname}}<br>
+                <span
+                        class="level"
+                        :class="getLevel(player.level)">Level: {{player.level}}
+                </span>
+            </div>
         </div>
+        <monster></monster>
     </div>
 </template>
 
@@ -15,28 +18,42 @@ import io from 'socket.io-client';
 import { mapMutations, mapState } from 'vuex';
 
 import { GAME_STORE, game } from '../../store/game';
+import { PLAYER_STORE, player } from '../../store/player';
+import Monster from '@/components/Game/Monster.vue';
 
 export default {
     name: 'GameView',
     inject: ['$axios'],
-    created() {
+    components: {
+        Monster
+    },
+    beforeCreate() {
         this.$store.registerModule(GAME_STORE, game);
-        this.$axios.get('/end');
-        const socket = io('http://138.68.125.74');
+        this.$store.registerModule(PLAYER_STORE, player);
+    },
+    async created() {
+        const { endpoint } = await this.$axios.get('/end');
+        const socket = io(`http://${endpoint}`);
 
+        this.gameInit(socket);
         socket.emit('imInGame', localStorage.getItem('auth'));
         socket.on('updatePlayersList', list => {
             this.updatePlayersList(list);
         });
+        socket.on('youAre', payload => {
+            this.setPlayer(payload);
+        });
     },
     beforeDestroy() {
         this.$store.unregisterModule(GAME_STORE);
+        this.$store.unregisterModule(PLAYER_STORE);
     },
     computed: {
         ...mapState(GAME_STORE, ['list'])
     },
     methods: {
         ...mapMutations(GAME_STORE, ['updatePlayersList']),
+        ...mapMutations(PLAYER_STORE, ['setPlayer', 'gameInit']),
         getLevel(level) {
             if (level < 10) {
                 return '';
@@ -57,6 +74,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    .container {
+        display: flex;
+    }
     .sidebar {
         display: flex;
         flex-wrap: wrap;

@@ -20,6 +20,7 @@ export default {
                     this.$router.push('/');
                 }
             } catch (err) {
+                alert('Incorrect credentials');
                 console.log(err);
             }
         }

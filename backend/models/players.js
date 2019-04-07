@@ -1,22 +1,36 @@
+const mongoose = require('mongoose');
+
 class Players {
     constructor() {
         this.players = [];
     }
 
     addPlayer({ socket, id }) {
-        if (this.players.find(player => player.id === id)) {
-            return;
-        }
+        this.removePlayer(socket);
         this.players.push({ socket, id });
     }
 
     removePlayer(socket) {
         const index = this.players.findIndex(player => player.socket === socket);
-        this.players.splice(index, 1)
+        this.players.splice(index, 1);
     }
 
-    getUserIds() {
+    getPlayerIds() {
         return this.players.map(player => player.id);
+    }
+
+    getPlayerId(socketId) {
+        return this.players.find(player => player.socket === socketId).id;
+    }
+
+    async lvlUpPlayer({ socket: socketId }) {
+        const { User } = mongoose.models;
+        const { id } = this.players.find(player => player.socket === socketId);
+        await User.findOneAndUpdate({ _id: id }, {
+            $inc: {
+                level: 1
+            }
+        });
     }
 }
 
