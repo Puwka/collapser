@@ -1,6 +1,5 @@
 const path = require('path');
 
-console.log(path.resolve(__dirname, './frontend/src'));
 module.exports = {
     configureWebpack: config => {
         config.entry = {
