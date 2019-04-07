@@ -4,7 +4,6 @@ const config = require('../../config');
 
 const connect = () => {
     const mongoHost = process.env.ENV === 'production' ? config.production.database.host : config.development.database.host;
-    console.log(mongoHost)
     mongoose.connect(`mongodb://${mongoHost}:27017/collapser`, { useNewUrlParser: true });
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connectiodsfn error:'));
